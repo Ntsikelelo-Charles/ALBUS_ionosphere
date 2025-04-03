@@ -140,14 +140,17 @@ ENV PYTHONPATH "$ALBUSINSTALL/share/python:$ALBUSINSTALL/lib:$PYTHONPATH"
 
 # Step 4 Fingers crossed -- build
 WORKDIR $ALBUSPATH
-#RUN make install
 RUN apt-get update && apt-get install -y cmake
 RUN apt-get update && apt-get install -y bison flex
 
-WORKDIR /src/ALBUS
-COPY . .
-RUN ls -l /src/ALBUS  # Debug: ensure CMakeLists.txt is present
-RUN rm -f /src/ALBUS/CMakeCache.txt && rm -rf /src/ALBUS/cbuild && mkdir /src/ALBUS/cbuild && cmake -S /src/ALBUS -B /src/ALBUS/cbuild
+WORKDIR $ALBUSPATH
+RUN ls -l $ALBUSPATH  # Debug: ensure CMakeLists.txt is present
+RUN find $ALBUSPATH -name CMakeCache.txt -delete
+RUN mkdir -p $ALBUSPATH/build
+
+# Older cmake, change to build directory and run cmake ..
+WORKDIR $ALBUSPATH/build
+RUN cmake ..
 
 RUN python -c "import AlbusIonosphere" && echo "Crack the bubbly - this hog is airborne!!!"
 
