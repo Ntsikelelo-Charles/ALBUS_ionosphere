@@ -1,13 +1,15 @@
 # ubuntu 18.04... for now
-FROM kernsuite/base:6
+FROM kernsuite/base:9
 
 # need to test whether we can migrate to GCC 10
-ENV GNUCOMPILER 6
-RUN docker-apt-install build-essential\ 
-                       g++-$GNUCOMPILER \
-                       gcc-$GNUCOMPILER \
-                       gfortran-$GNUCOMPILER \
-		               python3-dev \
+#ENV GNUCOMPILER 10
+RUN docker-apt-install build-essential\
+                    #    g++-$GNUCOMPILER \
+                    #    gcc-$GNUCOMPILER \
+                    #    gfortran-$GNUCOMPILER \
+                       g++ \
+                       gfortran \
+                       python3-dev \
                        python3-all \
                        ipython3 \
                        python3-ipdb \
@@ -22,25 +24,25 @@ RUN docker-apt-install build-essential\
                        python3-matplotlib \
                        python3-numpy \
                        python3-ephem \
-                       f2c \                                                               
-                       libf2c2-dev \                                                       
-                       bison \                                                             
+                       f2c \
+                       libf2c2-dev \
+                       bison \
                        flex \
                        python3-urllib3 \
                        unzip \
                        python3-nose \
                        python3-requests
 
-RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-$GNUCOMPILER 100 && \
-    update-alternatives --install /usr/bin/cc cc /usr/bin/gcc-$GNUCOMPILER 100 && \
-    update-alternatives --install /usr/bin/x86_64-linux-gnu-gcc x86_64-linux-gnu-gcc /usr/bin/gcc-$GNUCOMPILER 100 && \
-    update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-$GNUCOMPILER 100 && \
-    update-alternatives --install /usr/bin/x86_64-linux-gnu-g++ x86_64-linux-gnu-g++ /usr/bin/g++-$GNUCOMPILER 100 && \
-    update-alternatives --install /usr/bin/cpp cpp /usr/bin/g++-$GNUCOMPILER 100 && \
-    update-alternatives --install /usr/bin/x86_64-linux-gnu-cpp x86_64-linux-gnu-cpp /usr/bin/g++-$GNUCOMPILER 100 && \
-    update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-$GNUCOMPILER 100 && \
-    update-alternatives --install /usr/bin/x86_64-linux-gnu-gfortran x86_64-linux-gnu-gfortran /usr/bin/gfortran-$GNUCOMPILER 100 && \
-    update-alternatives --install /usr/bin/python python /usr/bin/python3.6 100
+# RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-$GNUCOMPILER 100 && \
+#     update-alternatives --install /usr/bin/cc cc /usr/bin/gcc-$GNUCOMPILER 100 && \
+#     update-alternatives --install /usr/bin/x86_64-linux-gnu-gcc x86_64-linux-gnu-gcc /usr/bin/gcc-$GNUCOMPILER 100 && \
+#     update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-$GNUCOMPILER 100 && \
+#     update-alternatives --install /usr/bin/x86_64-linux-gnu-g++ x86_64-linux-gnu-g++ /usr/bin/g++-$GNUCOMPILER 100 && \
+#     update-alternatives --install /usr/bin/cpp cpp /usr/bin/g++-$GNUCOMPILER 100 && \
+#     update-alternatives --install /usr/bin/x86_64-linux-gnu-cpp x86_64-linux-gnu-cpp /usr/bin/g++-$GNUCOMPILER 100 && \
+#     update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-$GNUCOMPILER 100 && \
+#     update-alternatives --install /usr/bin/x86_64-linux-gnu-gfortran x86_64-linux-gnu-gfortran /usr/bin/gfortran-$GNUCOMPILER 100 && \
+#     update-alternatives --install /usr/bin/python python /usr/bin/python3.6 100
 
 RUN mkdir -p /optsoft/bin && \
     mkdir -p /optsoft/lib && \
@@ -52,12 +54,12 @@ ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:/optsoft/lib
 ENV C_INCLUDE_PATH $C_INCLUDE_PATH:/optsoft/include
 ENV CPLUS_INCLUDE_PATH $C_INCLUDE_PATH:/optsoft/include
 
-# ---------- Build RNXCMP from source into /optsoft ---------- 
+# ---------- Build RNXCMP from source into /optsoft ----------
 RUN mkdir /src
 ADD RNXCMP_4.1.0_src.tar.gz /src/
 WORKDIR /src/RNXCMP_4.1.0_src/source
-RUN gcc-$GNUCOMPILER -ansi -O2 -static rnx2crx.c -o /optsoft/bin/RNX2CRX && \
-    gcc-$GNUCOMPILER -ansi -O2 -static crx2rnx.c -o /optsoft/bin/CRX2RNX && \
+RUN gcc -ansi -O2 -static rnx2crx.c -o /optsoft/bin/RNX2CRX && \
+    gcc -ansi -O2 -static crx2rnx.c -o /optsoft/bin/CRX2RNX && \
     ln -s /optsoft/bin/CRX2RNX /optsoft/bin/crx2rnx && \
     ln -s /optsoft/bin/RNX2CRX /optsoft/bin/rnx2crx
 
@@ -68,7 +70,7 @@ RUN mkdir /src/ALBUS
 ENV ALBUSPATH /src/ALBUS
 
 ADD IMF24_request.png $ALBUSPATH
-ADD cbuild $ALBUSPATH/cbuild
+# ADD cbuild $ALBUSPATH/cbuild
 ADD build_rnx_crx $ALBUSPATH
 ADD dates $ALBUSPATH
 ADD definitions $ALBUSPATH
@@ -144,11 +146,16 @@ WORKDIR $ALBUSPATH
 #RUN make install
 RUN apt-get update && apt-get install -y cmake
 RUN apt-get update && apt-get install -y bison flex
+RUN apt-get update && apt-get install -y tree
 
 WORKDIR /src/ALBUS
-COPY . .
-RUN ls -l /src/ALBUS  # Debug: ensure CMakeLists.txt is present
-RUN rm -f /src/ALBUS/CMakeCache.txt && rm -rf /src/ALBUS/cbuild && mkdir /src/ALBUS/cbuild && cmake -S /src/ALBUS -B /src/ALBUS/cbuild
+#COPY . .
+RUN tree /src/ALBUS -d # Debug: ensure CMakeLists.txt is present
+RUN find /src/ALBUS -name CMakeLists.txt
+RUN find /src/ALBUS -name CMakeCache.txt -delete
+RUN cmake --version
+RUN cmake -S /src/ALBUS -B /src/ALBUS/build
+RUN cmake --build /src/ALBUS/build
 
 RUN python -c "import AlbusIonosphere" && echo "Crack the bubbly - this hog is airborne!!!"
 
@@ -160,7 +167,7 @@ RUN python -c "import AlbusIonosphere" && echo "Crack the bubbly - this hog is a
 #            --user $(id -u <your user>):$(id -g <your user>) \
 #            albus:latest <path to script mounted inside the waterhole>
 # if you used 'albus as a tag when building the image'
-# you must download and accept the license for gfzrnx separately 
+# you must download and accept the license for gfzrnx separately
 # see https://dataservices.gfz-potsdam.de/panmetaworks/showshort.php?id=escidoc:1577894
 # Note: adding -it in the flags above should give you an interactive python session
 ENTRYPOINT [ "/usr/bin/python3.6" ]
