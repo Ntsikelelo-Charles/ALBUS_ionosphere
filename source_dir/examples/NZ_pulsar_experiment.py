@@ -35,6 +35,7 @@ if __name__ == "__main__":
   START_TIME="2023/2/20 00:00:00"
   END_TIME="2023/02/20 23:59:59"
   home_dir = os.path.expanduser('~')
+  print(home_dir)
   DATA_DIR = home_dir + '/PSR_J1145_data_2023'
   RED_TYPE = 'RI_G03'
   TIME_STEP = 300

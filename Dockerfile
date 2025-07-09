@@ -101,9 +101,9 @@ ADD AlbusIonosphere.cxx $ALBUSPATH/AlbusIonosphere.cxx
 
 # Step 2 configure install path and apply necessary patches to build system
 # set up include dir
-WORKDIR /src/ALBUS/source_dir/include
-RUN mkdir -p /optsoft/ALBUS/include
-RUN cp  *.h /optsoft/ALBUS/include/
+#WORKDIR /src/ALBUS/source_dir/include
+#RUN mkdir -p /optsoft/ALBUS/include
+#RUN cp  *.h /optsoft/ALBUS/include/
 
 
 
@@ -113,8 +113,8 @@ RUN cp  *.h /optsoft/ALBUS/include/
 # RUN mkdir -p /optsoft/ALBUS/man
 # RUN mkdir -p /optsoft/ALBUS/share
 
-## copy all data for libary
-# WORKDIR /src/ALBUS
+# copy all data for libary
+# WORKDIR /src/ALBUS/source_dir
 # RUN cp -r libdata/* /optsoft/ALBUS/libdata
 # ENV ALBUSINSTALL /optsoft/ALBUS
 
@@ -133,7 +133,7 @@ RUN sed -i "8s|.*|set(INSTALLDIR \"${ALBUSINSTALL}\")|" $ALBUSPATH/source_dir/CM
 
 # Step 3 Configure environment
 # ENV PATH "$ALBUSINSTALL/bin:$PATH"
-# ENV LD_LIBRARY_PATH "$ALBUSINSTALL/lib:$LD_LIBRARY_PATH"
+ENV LD_LIBRARY_PATH "$ALBUSINSTALL/lib:$LD_LIBRARY_PATH"
 # ENV PYTHONPATH "$ALBUSINSTALL/share/python:$ALBUSINSTALL/lib:$PYTHONPATH"
 
 # #Step 4 Fingers crossed -- build
@@ -156,12 +156,18 @@ RUN build_env/bin/pip install --upgrade pip
 WORKDIR /src/ALBUS
 RUN build_env/bin/pip install -U pip setuptools wheel
 RUN build_env/bin/pip install scikit-build-core[pyproject] numpy==1.21
-
+RUN build_env/bin/pip install astropy
+RUN build_env/bin/pip install PyEphem
+RUN build_env/bin/pip install requests
+RUN build_env/bin/pip install --force-reinstall numpy==1.21
 # RUN build_env/bin/pip install .
 # RUN build_env/bin/pip --no-build-isolation install .
 RUN build_env/bin/python -m pip install --no-build-isolation .
+RUN export PYTHONPATH=/src/ALBUS/build_env/lib/python3.10/site-packages/share
+WORKDIR /src/ALBUS/source_dir
+RUN cp -r libdata /src/ALBUS/build_env/lib/python3.10/site-packages
 #RUN export LD_LIBRARY_PATH=/src/ALBUS/build_env/lib/python3.10/site-packages/albusionosphere/lib:$LD_LIBRARY_PATH
-RUN build_env/bin/python -c "from albusionosphere import AlbusIonosphere"
+#RUN build_env/bin/python -c "from albusionosphere import AlbusIonosphere"
 
 # RUN apt-get update && apt-get install -y python-is-python3
 

@@ -58,11 +58,6 @@ set_target_properties(jmavex PROPERTIES
   SOVERSION "${VER_MAJOR}"
 )
 
-# Build static library (libjmavex.a)
-add_library(jmavex_static STATIC ${SRCS})
-set_target_properties(jmavex_static PROPERTIES
-  OUTPUT_NAME "jmavex"
-)
 
 # Link the external libraries to the shared library target.
 # This mirrors the Makefile’s EXTERN_LIBS:
@@ -100,8 +95,16 @@ add_executable(ell_coord_converter ell_coord_converter.cxx ellipsoidal_coord.cxx
 target_link_libraries(ell_coord_converter PRIVATE m)
 
 
+execute_process(
+  COMMAND ${Python3_EXECUTABLE} -c "import site; print(site.getsitepackages()[0])"
+  OUTPUT_VARIABLE PYTHON_SITE_PACKAGES
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+
 install(TARGETS jmavex
-  LIBRARY DESTINATION ${CMAKE_SOURCE_DIR}/albusionosphere)
+        LIBRARY DESTINATION ${PYTHON_SITE_PACKAGES}
+)
 
 
 #----------------------------------------------------------------------------

@@ -50,16 +50,24 @@ set_target_properties(vex PROPERTIES OUTPUT_NAME "vex"
   SOVERSION "${VER_MAJOR}"
 )
 
+
 set_target_properties(vex PROPERTIES
     INSTALL_RPATH "$ORIGIN"
     BUILD_WITH_INSTALL_RPATH TRUE
 )
 
 target_link_libraries(vex PUBLIC fl)
-# Installation rules: install both the libraries and headers
-install(TARGETS vex 
-    LIBRARY DESTINATION ${CMAKE_SOURCE_DIR}/albusionosphere)
+# Installation rules: install both the libraries and header
 
 
+execute_process(
+  COMMAND ${Python3_EXECUTABLE} -c "import site; print(site.getsitepackages()[0])"
+  OUTPUT_VARIABLE PYTHON_SITE_PACKAGES
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+install(TARGETS vex
+        LIBRARY DESTINATION ${PYTHON_SITE_PACKAGES}
+)
 
 

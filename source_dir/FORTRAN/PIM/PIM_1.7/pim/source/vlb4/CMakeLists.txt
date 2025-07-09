@@ -76,10 +76,7 @@ set_target_properties(pim PROPERTIES OUTPUT_NAME "pim"
  VERSION "${VER_MAJOR}.${VER_MINOR}.${VER_SUBSUB}"
   SOVERSION "${VER_MAJOR}")
 
-set_target_properties(pim PROPERTIES
-    INSTALL_RPATH "$ORIGIN"
-    BUILD_WITH_INSTALL_RPATH TRUE
-)
+
 # --------------------------------------------------------------------
 # Build Executable Targets
 #
@@ -99,6 +96,16 @@ target_link_libraries(pim_asub PRIVATE pim sofa ${F77_COMPILER_LIB} m)
 # The libraries will be placed in the "lib" directory and the headers
 # in the "include" directory of the install prefix.
 # --------------------------------------------------------------------
-install(TARGETS pim LIBRARY DESTINATION ${CMAKE_SOURCE_DIR}/albusionosphere)
+#install(TARGETS pim LIBRARY DESTINATION ${CMAKE_SOURCE_DIR}/albusionosphere)
+
+execute_process(
+  COMMAND ${Python3_EXECUTABLE} -c "import site; print(site.getsitepackages()[0])"
+  OUTPUT_VARIABLE PYTHON_SITE_PACKAGES
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
 
 
+
+install(TARGETS pim
+        LIBRARY DESTINATION ${PYTHON_SITE_PACKAGES}
+)

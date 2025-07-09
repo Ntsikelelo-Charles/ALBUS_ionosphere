@@ -156,10 +156,13 @@ target_link_libraries(mim PRIVATE
 )
 
 
-set_target_properties(mim PROPERTIES
-    INSTALL_RPATH "$ORIGIN"
-    BUILD_WITH_INSTALL_RPATH TRUE
-)
+#set_target_properties(mim PROPERTIES
+#    INSTALL_RPATH "$ORIGIN"
+#   BUILD_WITH_INSTALL_RPATH TRUE
+#)
+
+
+# Get Python site-packages directory
 
 
 
@@ -216,13 +219,26 @@ endforeach()
 # Install the library (shared or static) and the header files.
 # Also install the executables if desired.
 #----------------------------------------------------------------------------
-install(TARGETS mim
-        LIBRARY DESTINATION ${CMAKE_SOURCE_DIR}/albusionosphere
-      )
 
+
+set_target_properties(mim PROPERTIES
+    INSTALL_RPATH "$ORIGIN"
+    BUILD_WITH_INSTALL_RPATH TRUE
+)
+
+
+ execute_process(
+  COMMAND ${Python3_EXECUTABLE} -c "import site; print(site.getsitepackages()[0])"
+  OUTPUT_VARIABLE PYTHON_SITE_PACKAGES
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+install(TARGETS mim
+        LIBRARY DESTINATION ${PYTHON_SITE_PACKAGES}
+)
 
 install(TARGETS ${EXECUTABLES}
-        RUNTIME DESTINATION ${CMAKE_SOURCE_DIR}/albusionosphere/bin)
+        RUNTIME DESTINATION ${PYTHON_SITE_PACKAGES}/bin)
 
 #----------------------------------------------------------------------------
 # (Optional) Custom targets for cleaning, dependency generation, etc.

@@ -156,10 +156,7 @@ set_target_properties(sofa PROPERTIES
     SOVERSION "${VER_MAJOR}"
 )
 
-set_target_properties(sofa PROPERTIES
-    INSTALL_RPATH "$ORIGIN"
-    BUILD_WITH_INSTALL_RPATH TRUE
-)
+
 # Link the math library; if your Fortran compiler requires an additional runtime
 # library (e.g. g2c), add it here.
 target_link_libraries(sofa PRIVATE m)
@@ -169,8 +166,17 @@ target_link_libraries(sofa PRIVATE m)
 #
 # Install the shared library into the lib directory and the header into include.
 #---------------------------------------------------------------------------
+set_target_properties(sofa PROPERTIES
+    INSTALL_RPATH "$ORIGIN"
+    BUILD_WITH_INSTALL_RPATH TRUE
+)
+
+execute_process(
+  COMMAND ${Python3_EXECUTABLE} -c "import site; print(site.getsitepackages()[0])"
+  OUTPUT_VARIABLE PYTHON_SITE_PACKAGES
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
 install(TARGETS sofa
-    LIBRARY DESTINATION ${CMAKE_SOURCE_DIR}/albusionosphere )
-
-
-
+        LIBRARY DESTINATION ${PYTHON_SITE_PACKAGES}
+)

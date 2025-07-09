@@ -40,17 +40,27 @@ set_target_properties(vexplus PROPERTIES
   VERSION "${VER_MAJOR}.${VER_MINOR}.${VER_SUBSUB}"
   SOVERSION "${VER_MAJOR}"
 )
+
+
+
+target_link_libraries(vexplus PRIVATE vex)
+
 set_target_properties(vexplus PROPERTIES
     INSTALL_RPATH "$ORIGIN"
     BUILD_WITH_INSTALL_RPATH TRUE
 )
-
-target_link_libraries(vexplus PRIVATE vex)
 #----------------------------------------------------------------------------
 # Installation rules
 #----------------------------------------------------------------------------
 # Install the shared library and header file(s) to the specified directories.
-install(TARGETS vexplus LIBRARY DESTINATION ${CMAKE_SOURCE_DIR}/albusionosphere
+
+execute_process(
+  COMMAND ${Python3_EXECUTABLE} -c "import site; print(site.getsitepackages()[0])"
+  OUTPUT_VARIABLE PYTHON_SITE_PACKAGES
+  OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
+install(TARGETS vexplus
+        LIBRARY DESTINATION ${PYTHON_SITE_PACKAGES}
+)
 
